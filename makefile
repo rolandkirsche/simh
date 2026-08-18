@@ -3217,7 +3217,7 @@ pdp11panel : ${BIN}pdp11panel${EXE} ${BIN}pdp11${EXE}
 
 ${BIN}pdp11panel${EXE} : frontpanel/PDP11Panel.c sim_sock.c sim_frontpanel.c
 	#cmake:ignore-target
-	$(MAKEIT) OPTS="$(OS_CURSES_DEFS)" LNK_OPTS="$(OS_CURSES_LDFLAGS)" TESTS=0
+	$(MAKEIT) OPTS="$(OS_CCDEFS)" TESTS=0
 
 else # end of primary make recipies
 

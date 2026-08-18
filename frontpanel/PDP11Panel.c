@@ -22,11 +22,10 @@
 #define usleep(n) Sleep((n)/1000)
 #else
 #include <unistd.h>
-#if defined(HAVE_NCURSES)
-#include <ncurses.h>
-#endif
 #endif
 
+#define ESC "\033"
+#define CSI ESC "["
 #define CONSOLE_PORT "9999"
 
 static char *sim_path;
@@ -53,22 +52,6 @@ sprintf (buf1, "%4s  PC: %06o   PSW: %06o   SP: %06o   Instructions: %llu\n",
          states[sim_panel_get_state (panel)], PC, PSW, SP, simulation_time);
 sprintf (buf2, "R0: %06o  R1: %06o  R2: %06o  R3: %06o  R4: %06o  R5: %06o\n",
          R0, R1, R2, R3, R4, R5);
-#if defined(HAVE_NCURSES) && !defined(_WIN32)
-{
-static int row, col;
-
-if (get_pos)
-    getyx (stdscr, row, col);
-wmove (stdscr, 0, 0);
-printw ("%s", buf1);
-printw ("%s", buf2);
-if (set_pos)
-    wmove (stdscr, row, col);
-wrefresh (stdscr);
-}
-#else
-#define ESC "\033"
-#define CSI ESC "["
 if (get_pos)
     printf (CSI "s");
 printf (CSI "H");
@@ -77,37 +60,19 @@ printf ("%s", buf2);
 if (set_pos)
     printf (CSI "u");
 printf ("\r\n");
-#endif
 }
 
 static void CleanupDisplay (void)
 {
-#if defined(HAVE_NCURSES) && !defined(_WIN32)
-endwin ();
-#endif
 (void)remove (sim_config);
 }
 
 static void InitDisplay (void)
 {
-#if defined(HAVE_NCURSES) && !defined(_WIN32)
-initscr ();
-wclear (stdscr);
-scrollok (stdscr, 1);
-{
-int max_height = 0, max_width = 0;
-getmaxyx (stdscr, max_height, max_width);
-setscrreg (4, max_height - 1);
-}
-#else
 printf (CSI "H" CSI "2J");
-#endif
 printf ("\n\n\n");
 printf ("Guest console: telnet localhost " CONSOLE_PORT "\n");
 printf ("^C to Halt, Commands: BOOT, CONT, STEP, EXAMINE <reg>, BREAK <addr>, NOBREAK <addr>, EXIT\n");
-#if defined(HAVE_NCURSES) && !defined(_WIN32)
-wrefresh (stdscr);
-#endif
 atexit (CleanupDisplay);
 }
 
